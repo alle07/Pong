@@ -1,0 +1,9 @@
+<Project>
+  <!-- Disable MonoGame MGCB build steps for all projects in this repo to avoid invoking dotnet tool restore during build.
+       This restores previous successful builds when you don't need MGCB content building during the normal build.
+       If you need content building, remove this file and either create a dotnet tool manifest and install dotnet-mgcb
+       or ask me to add a safer RunContentBuilder override. -->
+  <PropertyGroup>
+    <EnableMGCBItems>false</EnableMGCBItems>
+  </PropertyGroup>
+</Project>

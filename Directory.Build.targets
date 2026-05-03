@@ -1,0 +1,34 @@
+<Project>
+  <!-- Override RunContentBuilder from the MonoGame package to avoid failing the build
+       when no dotnet tool manifest exists or when tool restore fails. This keeps the
+       original behavior but only runs `dotnet tool restore` when a tool manifest is
+       present and will not fail the build if restore fails. Placing this in the
+       repository root (Directory.Build.targets) overrides the imported targets
+       from the package without editing the global NuGet package cache. -->
+
+  <Target Name="RunContentBuilder" DependsOnTargets="PrepareContentBuilder">
+
+    <!-- Only run dotnet tool restore when a tool manifest exists; don't fail the build if restore fails. -->
+    <Exec
+      Condition="Exists('$(MSBuildProjectDirectory)/.config/dotnet-tools.json')"
+      Command="$(DotnetCommand) tool restore"
+      WorkingDirectory="$(MSBuildProjectDirectory)"
+      ContinueOnError="WarnAndContinue" />
+
+    <!-- Execute MGCB from the project directory so we use the correct manifest. -->
+    <Exec
+      Condition="'%(ContentReference.FullPath)' != ''"
+      Command="$(DotnetCommand) $(MGCBCommand) $(MonoGameMGCBAdditionalArguments) /@:&quot;%(ContentReference.FullPath)&quot; /platform:$(MonoGamePlatform) /outputDir:&quot;%(ContentReference.ContentOutputDir)&quot; /intermediateDir:&quot;%(ContentReference.ContentIntermediateOutputDir)&quot; /workingDir:&quot;%(ContentReference.FullDir)&quot;"
+      WorkingDirectory="$(MSBuildProjectDirectory)" />
+
+    <ItemGroup>
+      <ExtraContent
+        Condition="'%(ContentReference.ContentOutputDir)' != ''"
+        Include="%(ContentReference.ContentOutputDir)\**\*.*">
+        <ContentDir>%(ContentReference.ContentDir)</ContentDir>
+      </ExtraContent>
+    </ItemGroup>
+
+  </Target>
+
+</Project>

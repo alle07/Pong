@@ -10,6 +10,11 @@ namespace Pong
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
+        // Bakgrundsdata
+        Texture2D _background;
+        Vector2 _backgroundSize;
+        
+
         // Bollens data
         Texture2D _ballImg;
         Vector2 _ballPos;
@@ -21,7 +26,7 @@ namespace Pong
         Texture2D _padImg;
         Vector2 _padPos1;
         Vector2 _padPos2;
-        Vector2 _padSpeed = new Vector2(0, 6);
+        Vector2 _padSpeed = new Vector2(0, 7);
         Rectangle _padBB1; // BoundingBox
         Rectangle _padBB2;
 
@@ -56,6 +61,10 @@ namespace Pong
 
         protected override void LoadContent()
         {
+            _background = Texture2D.FromFile(GraphicsDevice, "bilder/bakgrund.png");
+            _backgroundSize = new Vector2(_background.Width, _background.Height);
+
+
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             _ballImg = Texture2D.FromFile(GraphicsDevice, "bilder/boll.png");
@@ -89,8 +98,8 @@ namespace Pong
                 _padPos1.Y += _padSpeed.Y;
             }
 
-            // Spelare 2 rörelser (AI) - smooth following without invalid 'Sleep' call
-            // Use Lerp to make movement smidigare istället för attempting to call a non-existent Sleep on Vector2
+            //AI-rörelser
+            // Lerp för att göra AI-paddeln smidigare och mer naturlig
             _padPos2.Y = MathHelper.Lerp(_padPos2.Y, _ballPos.Y, 0.08f);
 
             // Begränsa paddlar till skärmen
@@ -112,9 +121,17 @@ namespace Pong
             }
 
             // Kollision med paddlar
-            if (_padBB1.Intersects(_ballBB) || _padBB2.Intersects(_ballBB))
+            if (_padBB1.Intersects(_ballBB))
             {
-                _ballDirection.X = -_ballDirection.X;
+                _ballPos.X = _padBB1.Right;
+                _ballDirection.X = Math.Abs(_ballDirection.X);
+                _ballSpeed = new Vector2(11, 11);
+            }
+
+            if (_padBB2.Intersects(_ballBB))
+            {
+                _ballPos.X = _padBB2.Left - _ballImg.Width;
+                _ballDirection.X = -Math.Abs(_ballDirection.X);
                 _ballSpeed = new Vector2(11, 11);
             }
 
@@ -123,11 +140,13 @@ namespace Pong
             {
                 _player2Points++;
                 ResetBall();
+                ResetPads();
             }
             else if (_ballPos.X + _ballImg.Width > SCREEN_WIDTH)
             {
                 _player1Points++;
                 ResetBall();
+                ResetPads();
             }
 
             base.Update(gameTime);
@@ -139,6 +158,11 @@ namespace Pong
             _ballDirection.X = -_ballDirection.X;
             _ballSpeed = new Vector2(5, 5);
         }
+        private void ResetPads()
+        {
+            _padPos1 = new Vector2(10, SCREEN_HEIGHT / 2 - _padImg.Height / 2);
+            _padPos2 = new Vector2(SCREEN_WIDTH - 10 - _padImg.Width, SCREEN_HEIGHT / 2 - _padImg.Height / 2);
+        }
 
         protected override void Draw(GameTime gameTime)
         {
@@ -146,14 +170,18 @@ namespace Pong
 
             _spriteBatch.Begin();
 
+            // Rita bakgrund
+            _spriteBatch.Draw(_background, Vector2.Zero, Color.FromNonPremultiplied(0x6B, 0xA6, 0xFF, 255)
+);
+
             // Rita boll och paddlar
-            _spriteBatch.Draw(_ballImg, _ballPos, Color.White);
-            _spriteBatch.Draw(_padImg, _padPos1, Color.White);
+            _spriteBatch.Draw(_ballImg, _ballPos, Color.FromNonPremultiplied(0xFF, 0xB3, 0x3B, 255));
+            _spriteBatch.Draw(_padImg, _padPos1, Color.FromNonPremultiplied(0xFF, 0xFF, 0xFF, 255));
             _spriteBatch.Draw(_padImg, _padPos2, Color.White);
 
             // Rita poäng
-            _spriteBatch.DrawString(_pointFont, $"Player 1: {_player1Points}", _player1PointPos, Color.Red);
-            _spriteBatch.DrawString(_pointFont, $"Player 2: {_player2Points}", _player2PointPos, Color.Red);
+            _spriteBatch.DrawString(_pointFont, $"Player 1: {_player1Points}", _player1PointPos, Color.FromNonPremultiplied(0xF8, 0xF8, 0xF8, 255));
+            _spriteBatch.DrawString(_pointFont, $"Player 2: {_player2Points}", _player2PointPos, Color.FromNonPremultiplied(0xF8, 0xF8, 0xF8, 255));
 
             _spriteBatch.End();
 

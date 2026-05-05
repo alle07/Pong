@@ -12,14 +12,13 @@ namespace Pong
 
         // Bakgrundsdata
         Texture2D _background;
-        Vector2 _backgroundSize;
         
 
         // Bollens data
         Texture2D _ballImg;
         Vector2 _ballPos;
         Vector2 _ballDirection = new Vector2(1, 1);
-        Vector2 _ballSpeed = new Vector2(11, 11);
+        Vector2 _ballSpeed = new Vector2(10, 10);
         Rectangle _ballBB; // BoundingBox
 
         // Pad-data
@@ -62,7 +61,6 @@ namespace Pong
         protected override void LoadContent()
         {
             _background = Texture2D.FromFile(GraphicsDevice, "bilder/bakgrund.png");
-            _backgroundSize = new Vector2(_background.Width, _background.Height);
 
 
             _spriteBatch = new SpriteBatch(GraphicsDevice);
@@ -100,7 +98,7 @@ namespace Pong
 
             //AI-rörelser
             // Lerp för att göra AI-paddeln smidigare och mer naturlig
-            _padPos2.Y = MathHelper.Lerp(_padPos2.Y, _ballPos.Y, 0.08f);
+            _padPos2.Y = MathHelper.Lerp(_padPos2.Y, _ballPos.Y, _padSpeed.Y / 100f);
 
             // Begränsa paddlar till skärmen
             _padPos1.Y = Math.Clamp(_padPos1.Y, 0, SCREEN_HEIGHT - _padImg.Height);
